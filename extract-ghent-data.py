@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+"""\
+A small ETL script to extract some public data from the city of Ghent and load it into a local sqlite3 database.
+"""
 import pandas as pd
 import sqlite3
 import os.path
