@@ -1,0 +1,10 @@
+# IDE files
+.idea/*
+.vscode/*
+
+# python env
+.venv
+
+# project cache and output
+staging
+ghent-data.db
