@@ -162,6 +162,9 @@ def process_crime_data_for_year(dbcon: sqlite3.Connection, year: int, category_d
     # fix data typos
     df['misdrijf_categorie_naam'] = df['misdrijf_categorie_naam'].str.replace('Verkeerongevallen', 'Verkeersongevallen')
 
+    # unfortunately the data quality is really poor with lots of duplicates
+    df = df[~df.duplicated(['jaar_maand', 'stadswijk_id', 'misdrijf_categorie_naam'])]
+
     # extend crime category id dict
     for category in df['misdrijf_categorie_naam'].unique():
         if not category_dict.get(category):
