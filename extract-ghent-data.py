@@ -14,16 +14,6 @@ DATABASE_FILE = 'ghent-data.db'
 DISTRICT_URL = ('https://data.stad.gent/api/explore/v2.1/catalog/datasets/stadswijken-gent/exports/csv?lang=en&timezone'
                 '=Europe%2FBrussels&use_labels=true&delimiter=%3B')
 DISTRICT_CSV_FILE = 'stadswijken-gent.csv'
-DISTRICT_COLUMN_MAP = {
-    'nieuwnr': 'stadswijk_id',
-    'naam': 'stadsdeel',
-    'wijk': 'stadswijk_naam'
-}
-DISTRICT_COLUMN_LIST = {
-    'stadswijk_id',
-    'stadsdeel',
-    'stadswijk_naam'
-}
 
 DISTRICT_POPULATION_URL = ('https://data.stad.gent/api/explore/v2.1/catalog/datasets/bevolkingsaantal-per-wijk-per-jaar'
                            '-gent/exports/csv?lang=en&timezone=Europe%2FBrussels&use_labels=true&delimiter=%3B')
@@ -119,10 +109,29 @@ def create_date_dim(dbcon: sqlite3.Connection) -> None:
 
 def process_district(dbcon: sqlite3.Connection) -> None:
     df = read_or_fetch_data(DISTRICT_CSV_FILE, DISTRICT_URL)
+    df.rename(columns={'nieuwnr': 'stadswijk_id'}, inplace=True)
+    df.rename(columns={'naam': 'stadsdeel'}, inplace=True)
+    df.rename(columns={'wijk': 'stadswijk_naam'}, inplace=True)
 
-    df = rename_columns(df, DISTRICT_COLUMN_MAP)
-    df = filter_columns(df, DISTRICT_COLUMN_LIST)
+    # Extend with area size info
+    df_gebieden = pd.read_csv('import/Gebieden - wijken van Gent.csv', delimiter=';')
+    df_gebieden['stadswijk_naam'] = df_gebieden['naam van het gebied'].str.replace(' (Gent)', '')
+    df_gebieden.rename(columns={'oppervlakte (in km²)': 'oppervlakte_km2'}, inplace=True)
+    df_gebieden.rename(columns={'oppervlakte (in m²)': 'oppervlakte_m2'}, inplace=True)
+    df_gebieden.rename(columns={'oppervlakte (in ha)': 'oppervlakte_ha'}, inplace=True)
 
+    df = df.merge(df_gebieden, how='left', on='stadswijk_naam')
+
+    stadswijk_columns = {
+        'stadswijk_id',
+        'stadsdeel',
+        'stadswijk_naam',
+        'oppervlakte_km2',
+        'oppervlakte_m2',
+        'oppervlakte_ha'
+    }
+
+    df = filter_columns(df, stadswijk_columns)
     df.to_sql(name='stadswijk', con=dbcon, if_exists='append', index=False)
 
 

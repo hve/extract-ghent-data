@@ -40,3 +40,4 @@ python extract-ghent-data.py
 
 - [Gent Open Data](https://data.stad.gent)
 - [Gent in cijfers](https://gent.buurtmonitor.be/)
+- [Provincies in cijfers](https://provincies.incijfers.be/)

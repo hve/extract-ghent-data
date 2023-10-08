@@ -14,6 +14,9 @@ CREATE TABLE "stadswijk" (
     "stadswijk_id" INTEGER NOT NULL,
 	"stadswijk_naam" TEXT,
 	"stadsdeel" TEXT,
+	"oppervlakte_km2" DOUBLE,
+	"oppervlakte_m2" DOUBLE,
+	"oppervlakte_ha" DOUBLE,
 	PRIMARY KEY("stadswijk_id")
 );
 
